@@ -27,7 +27,7 @@ case $option in
     1)
         read -p "Enter destination number (+34655555555): " number
         read -p "Enter sender name: " sender
-        read -p "Enter message: " message
+        read -p "Enter message (Open the next link: {LINK}): " message
         read -p "Enter link (https://www.example.com): " link
         curl -X POST \
         -H 'Content-Type: application/json' \
