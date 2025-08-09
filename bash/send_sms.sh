@@ -5,15 +5,13 @@ RED='\033[0;31m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-PROJECT_ROOT="$(dirname "$(dirname "$0")")"
-ENV_FILE="$PROJECT_ROOT/.env"
+ENV_FILE="$(dirname "$(dirname "$0")")/.env"
+source "$ENV_FILE"
 
 if [ ! -f "$ENV_FILE" ]; then
     echo -e "${RED}[!] .env file not found. Please run setup.sh first.${NC}"
     exit 1
 fi
-
-source "$ENV_FILE"
 
 if [ -z "$API_KEY" ]; then
     echo -e "${RED}API key not found in .env.${NC}"
@@ -27,10 +25,10 @@ read -p "Option: " option
 
 case $option in
     1)
-        read -p "Enter destination number: " number
+        read -p "Enter destination number (+34655555555): " number
         read -p "Enter sender name: " sender
         read -p "Enter message: " message
-        read -p "Enter link: " link
+        read -p "Enter link (https://www.example.com): " link
         curl -X POST \
         -H 'Content-Type: application/json' \
         -H 'Accept: application/json' \
@@ -44,7 +42,7 @@ case $option in
         https://api.gateway360.com/api/3.0/sms/send-link
         ;;
     2)
-        read -p "Enter destination number: " number
+        read -p "Enter destination number (+34655555555): " number
         read -p "Enter sender name: " sender
         message="Mensaje recibido correctamente desde el remitente $sender"
         curl -X POST \

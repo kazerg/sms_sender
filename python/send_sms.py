@@ -22,10 +22,10 @@ print("2) Send confirmation SMS")
 option = input("Option: ")
 
 if option == "1":
-    number = input("Enter destination number: ")
+    number = input("Enter destination number (+34655555555): ")
     sender = input("Enter sender name: ")
     message = input("Enter message: ")
-    link = input("Enter link: ")
+    link = input("Enter link (https://www.example.com): ")
     payload = {
         "api_key": API_KEY,
         "report_url": "http://yourserver.com/callback/script",
@@ -36,7 +36,7 @@ if option == "1":
     url = "https://api.gateway360.com/api/3.0/sms/send-link"
 
 elif option == "2":
-    number = input("Enter destination number: ")
+    number = input("Enter destination number (+34655555555): ")
     sender = input("Enter sender name: ")
     message = f"Mensaje recibido correctamente desde el remitente {sender}"
     payload = {
