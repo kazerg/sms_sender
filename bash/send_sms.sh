@@ -5,7 +5,7 @@ RED='\033[0;31m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-ENV_FILE="$(dirname "$(dirname "$0")")/.env"
+ENV_FILE="../.env"
 source "$ENV_FILE"
 
 if [ ! -f "$ENV_FILE" ]; then
