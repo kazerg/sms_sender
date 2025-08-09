@@ -6,8 +6,8 @@ It includes both Bash and Python versions for flexibility, and is designed to wo
 
 ## Instalación / Installation
 ```bash
-git clone https://github.com/yourusername/sms_sender_project.git
-cd sms_sender_project
+git clone https://github.com/kazerg/sms_sender.git
+cd sms_sender
 chmod +x setup.sh
 ./setup.sh
 ```
