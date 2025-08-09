@@ -1,16 +1,20 @@
 import os
 import json
 import requests
+from dotenv import load_dotenv
 
-# Cargar API key desde .env
-if not os.path.exists(".env"):
-    print("API key not found. Please run setup.sh first.")
-    exit()
+# Cargar .env
+env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+if not os.path.exists(env_path):
+    print("Error: .env file not found. Please run setup.sh first.")
+    exit(1)
 
-with open(".env") as f:
-    for line in f:
-        if line.startswith("API_KEY"):
-            API_KEY = line.strip().split("=")[1]
+load_dotenv(dotenv_path=env_path)
+
+API_KEY = os.getenv("API_KEY")
+if not API_KEY:
+    print("API_KEY is missing in .env.")
+    exit(1)
 
 print("Choose an option:")
 print("1) Send SMS with link")
@@ -44,7 +48,11 @@ elif option == "2":
 
 else:
     print("Invalid option.")
-    exit()
+    exit(1)
 
-response = requests.post(url, headers={"Content-Type": "application/json", "Accept": "application/json"}, data=json.dumps(payload))
+response = requests.post(url, headers={
+    "Content-Type": "application/json",
+    "Accept": "application/json"
+}, data=json.dumps(payload))
+
 print(response.text)

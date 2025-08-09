@@ -3,41 +3,26 @@
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-source .env
+PROJECT_ROOT="$(dirname "$(dirname "$0")")"
+ENV_FILE="$PROJECT_ROOT/.env"
 
-if [ -z "$API_KEY" ]; then
-    echo -e "\a${RED}API key not found. Please run setup.sh first.${NC}"
+if [ ! -f "$ENV_FILE" ]; then
+    echo -e "${RED}[!] .env file not found. Please run setup.sh first.${NC}"
     exit 1
 fi
 
-echo "Choose language / Elige idioma:"
-echo "1) English"
-echo "2) Español"
-read -p "Option: " lang
-clear
+source "$ENV_FILE"
 
-case $lang in
-  2)
-    MSG_MENU="Selecciona una opción:"
-    MSG_OPT1="Enviar SMS con enlace"
-    MSG_OPT2="Enviar SMS de confirmación"
-    MSG_ERR="Opción inválida"
-    MSG_DONE="Solicitud enviada"
-    ;;
-  *)
-    MSG_MENU="Choose an option:"
-    MSG_OPT1="Send SMS with link"
-    MSG_OPT2="Send confirmation SMS"
-    MSG_ERR="Invalid option"
-    MSG_DONE="Request sent"
-    ;;
-esac
+if [ -z "$API_KEY" ]; then
+    echo -e "${RED}API key not found in .env.${NC}"
+    exit 1
+fi
 
-echo -e "\a${YELLOW}$MSG_MENU${NC}"
-echo "1) $MSG_OPT1"
-echo "2) $MSG_OPT2"
+echo -e "${YELLOW}Choose an option:${NC}"
+echo "1) Send SMS with link"
+echo "2) Send confirmation SMS"
 read -p "Option: " option
 
 case $option in
@@ -73,9 +58,6 @@ case $option in
         https://api.gateway360.com/api/3.0/sms/send
         ;;
     *)
-        echo -e "\a${RED}$MSG_ERR${NC}"
-        exit 1
+        echo -e "${RED}Invalid option.${NC}"
         ;;
 esac
-
-echo -e "\a${GREEN}$MSG_DONE${NC}"
