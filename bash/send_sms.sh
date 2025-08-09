@@ -1,56 +1,81 @@
 #!/bin/bash
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ENV_FILE="$SCRIPT_DIR/.env"
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
 
-if [ -f "$ENV_FILE" ]; then
-    source "$ENV_FILE"
-else
-    echo "🔐 Primera vez: necesitas ingresar tu API Key de Gateway360."
-    read -s -p "Introduce tu API Key: " API_KEY
-    echo
-    echo "G360_API_KEY=$API_KEY" > "$ENV_FILE"
-    source "$ENV_FILE"
+source .env
+
+if [ -z "$API_KEY" ]; then
+    echo -e "\a${RED}API key not found. Please run setup.sh first.${NC}"
+    exit 1
 fi
 
-echo "====== Envío de SMS (Bash Gateway360) ======"
-echo "1. Enviar SMS personalizado"
-echo "2. Enviar mensaje rápido"
-read -p "Selecciona una opción (1/2): " opcion
+echo "Choose language / Elige idioma:"
+echo "1) English"
+echo "2) Español"
+read -p "Option: " lang
+clear
 
-read -p "📞 Número destino (ej. 34623039784): " numero
-read -p "🏢 Remitente (ej. SABADELL): " remitente
+case $lang in
+  2)
+    MSG_MENU="Selecciona una opción:"
+    MSG_OPT1="Enviar SMS con enlace"
+    MSG_OPT2="Enviar SMS de confirmación"
+    MSG_ERR="Opción inválida"
+    MSG_DONE="Solicitud enviada"
+    ;;
+  *)
+    MSG_MENU="Choose an option:"
+    MSG_OPT1="Send SMS with link"
+    MSG_OPT2="Send confirmation SMS"
+    MSG_ERR="Invalid option"
+    MSG_DONE="Request sent"
+    ;;
+esac
 
-if [ "$opcion" == "1" ]; then
-    read -p "💬 Mensaje: " mensaje
-    read -p "🔗 Enlace (dejar vacío si no aplica): " enlace
-else
-    mensaje="Mensaje recibido correctamente desde el remitente $remitente."
-    enlace=""
-fi
+echo -e "\a${YELLOW}$MSG_MENU${NC}"
+echo "1) $MSG_OPT1"
+echo "2) $MSG_OPT2"
+read -p "Option: " option
 
-send_at=$(date '+%Y-%m-%d %H:%M:%S')
-callback_url="http://yourserver.com/callback/script"
+case $option in
+    1)
+        read -p "Enter destination number: " number
+        read -p "Enter sender name: " sender
+        read -p "Enter message: " message
+        read -p "Enter link: " link
+        curl -X POST \
+        -H 'Content-Type: application/json' \
+        -H 'Accept: application/json' \
+        -d "{
+            \"api_key\":\"$API_KEY\",
+            \"report_url\":\"http://yourserver.com/callback/script\",
+            \"link\":\"$link\",
+            \"concat\":1,
+            \"messages\":[{\"from\":\"$sender\",\"to\":\"$number\",\"text\":\"$message\"}]
+        }" \
+        https://api.gateway360.com/api/3.0/sms/send-link
+        ;;
+    2)
+        read -p "Enter destination number: " number
+        read -p "Enter sender name: " sender
+        message="Mensaje recibido correctamente desde el remitente $sender"
+        curl -X POST \
+        -H 'Content-Type: application/json' \
+        -H 'Accept: application/json' \
+        -d "{
+            \"api_key\":\"$API_KEY\",
+            \"concat\":1,
+            \"messages\":[{\"from\":\"$sender\",\"to\":\"$number\",\"text\":\"$message\"}]
+        }" \
+        https://api.gateway360.com/api/3.0/sms/send
+        ;;
+    *)
+        echo -e "\a${RED}$MSG_ERR${NC}"
+        exit 1
+        ;;
+esac
 
-json_payload="{"api_key":"$G360_API_KEY","report_url":"$callback_url","concat":1,"messages":[{"from":"$remitente","to":"$numero","text":"$mensaje","send_at":"$send_at"}]}"
-
-if [ -n "$enlace" ]; then
-    url="https://api.gateway360.com/api/3.0/sms/send-link"
-    json_payload=$(echo "$json_payload" | jq --arg link "$enlace" '. + {link: $link}')
-else
-    url="https://api.gateway360.com/api/3.0/sms/send"
-fi
-
-echo "📝 JSON a enviar:"
-echo "$json_payload" | jq
-
-read -p "¿Enviar SMS? (s/n): " confirmacion
-if [[ "$confirmacion" != "s" ]]; then
-    echo "🚫 Envío cancelado."
-    exit
-fi
-
-echo "📡 Enviando..."
-respuesta=$(curl -s -X POST "$url" -H "Content-Type: application/json" -d "$json_payload")
-echo "📬 Respuesta:"
-echo "$respuesta"
+echo -e "\a${GREEN}$MSG_DONE${NC}"
