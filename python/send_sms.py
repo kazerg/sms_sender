@@ -24,7 +24,7 @@ option = input("Option: ")
 if option == "1":
     number = input("Enter destination number (+34655555555): ")
     sender = input("Enter sender name: ")
-    message = input("Enter message: ")
+    message = input("Enter message (Open the next link: {LINK}): ")
     link = input("Enter link (https://www.example.com): ")
     payload = {
         "api_key": API_KEY,
